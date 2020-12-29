@@ -1,0 +1,31 @@
+loc=xlsread('data1'); 
+x2=loc(:,2);
+y2=loc(:,3);
+z2=loc(:,4); 
+xydata=[x2,y2]; 
+canshu0=[0 0 0];  %定义三个参数，zhe
+f=@(canshu0,xydata)1.0008.*canshu0(1).*exp(-0.0202.*sqrt( (xydata(:,1)- canshu0(2)).^2+(xydata(:,2)-canshu0(3)).^2 ));
+lb=zeros(1,3); 
+ub=[inf 50 80];
+canshu=lsqcurvefit(f,canshu0,xydata,z2,lb,ub) 
+zhat=1.0008.*canshu(1).*exp(-0.0202.*sqrt( (x2-canshu(2)).^2+(y2-canshu(3)).^2 ));
+mse=sum((zhat-z2).^2)./length(z2)	%mse 
+[h p]=ttest2(z2,zhat,'Alpha',0.01)
+
+tx=linspace(0,50,1000); 
+ty=linspace(0,80,1000); 
+ty=ty';
+tz=1.0008.*canshu(1).*exp(-0.0202.*sqrt( (tx-canshu(2)).^2+(ty- canshu(3)).^2 ));
+
+hold on 
+subplot(1,2,1);
+meshc(tx,ty,tz);
+xlabel('x轴');
+ylabel('y轴');
+zlabel('绝对浓度');
+
+subplot(1,2,2)
+[C h]=contour(tx,ty,tz);
+clabel(C,h);
+xlabel('x轴');
+ylabel('y轴');
